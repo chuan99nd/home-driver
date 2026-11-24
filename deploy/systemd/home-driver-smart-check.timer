@@ -1,0 +1,12 @@
+[Unit]
+Description=home-driver: schedule for the daily SMART check
+
+[Timer]
+OnCalendar=*-*-* 09:00:00
+# Persistent: if the laptop was off at the scheduled time, run at next boot.
+Persistent=true
+AccuracySec=1min
+Unit=home-driver-smart-check.service
+
+[Install]
+WantedBy=timers.target

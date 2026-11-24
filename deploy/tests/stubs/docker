@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+# Test stub for docker.
+echo "docker $*" >>"${STUB_LOG:-/dev/null}"
+if [[ "${1:-}" == exec && "$*" == *pg_dump* ]]; then
+  [[ "${STUB_DOCKER_FAIL:-0}" == 1 ]] && { echo "Error: No such container" >&2; exit 1; }
+  printf -- '--\n-- PostgreSQL database dump\n--\n\nCREATE TABLE asset (id int);\n\n--\n-- PostgreSQL database dump complete\n--\n'
+fi
+# `docker exec -i ... psql` is fed a dump on stdin: read it like the real thing.
+if [[ "${1:-}" == exec && "${2:-}" == -i ]]; then cat >/dev/null; fi
+exit 0

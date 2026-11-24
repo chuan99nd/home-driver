@@ -1,0 +1,110 @@
+#
+# Immich for home-driver.
+#
+# SOURCE: the official release file of Immich v3.4.2
+#   https://github.com/immich-app/immich/releases/download/v3.4.2/docker-compose.yml
+# Do NOT write this file from memory when upgrading: download the new release's
+# file, diff it against this one, and re-apply the home-driver changes listed
+# below (see deploy/docs/RUNBOOK.md "Upgrading Immich").
+#
+# home-driver changes relative to upstream (each marked "home-driver:" below):
+#   1. env_file points at /etc/home-driver/immich.env instead of ./.env
+#   2. the web port is published on 127.0.0.1 only (Cloudflare Tunnel is the way in)
+#   3. the upload volume uses the long bind syntax with create_host_path: false,
+#      so a container can never start (and write to the SSD) when Disk A is not mounted
+#   4. the image tag has no floating default: IMMICH_VERSION must be set (pinned)
+#   5. commented example for keeping thumbnails on the SSD
+#
+# Do not run `docker compose` on this file directly. Use:
+#   sudo /opt/home-driver/scripts/immich-compose.sh <args>
+# or the systemd unit home-driver-immich.service.
+
+name: immich
+
+services:
+  immich-server:
+    container_name: immich_server
+    # home-driver: no ":-release" fallback. An unset version must be an error, not "latest".
+    image: ghcr.io/immich-app/immich-server:${IMMICH_VERSION:?set IMMICH_VERSION in /etc/home-driver/immich.env}
+    # extends:
+    #   file: hwaccel.transcoding.yml
+    #   service: cpu # set to one of [nvenc, quicksync, rkmpp, vaapi, vaapi-wsl] for accelerated transcoding
+    volumes:
+      # home-driver: long syntax so Docker refuses to start instead of silently
+      # creating an empty directory on the SSD when Disk A is unplugged.
+      - type: bind
+        source: ${UPLOAD_LOCATION:?set UPLOAD_LOCATION in /etc/home-driver/immich.env}
+        target: /data
+        bind:
+          create_host_path: false
+      # home-driver (optional): keep thumbnails on the internal SSD for a snappier
+      # timeline. Trade-off: they are then NOT on Disk A and NOT backed up (they can
+      # be regenerated: Administration > Job Queues > Generate Thumbnails > All).
+      # To enable: set THUMB_LOCATION=/var/lib/home-driver/immich-thumbs in immich.env,
+      # stop Immich, move the existing /srv/home-driver/data/immich/thumbs content
+      # (including its hidden .immich file) there, then uncomment the next 5 lines.
+      # - type: bind
+      #   source: ${THUMB_LOCATION}
+      #   target: /data/thumbs
+      #   bind:
+      #     create_host_path: false
+      - /etc/localtime:/etc/localtime:ro
+    env_file:
+      # home-driver: was ".env"
+      - ${IMMICH_ENV_FILE:-/etc/home-driver/immich.env}
+    ports:
+      # home-driver: was '2283:2283' (all interfaces). Loopback only.
+      - '127.0.0.1:2283:2283'
+    depends_on:
+      - redis
+      - database
+    restart: always
+    healthcheck:
+      disable: false
+
+  immich-machine-learning:
+    container_name: immich_machine_learning
+    # For hardware acceleration, add one of -[armnn, cuda, rocm, openvino, rknn] to the image tag.
+    # Example tag: ${IMMICH_VERSION:-release}-cuda
+    image: ghcr.io/immich-app/immich-machine-learning:${IMMICH_VERSION:?set IMMICH_VERSION in /etc/home-driver/immich.env}
+    # extends: # uncomment this section for hardware acceleration - see https://docs.immich.app/features/ml-hardware-acceleration
+    #   file: hwaccel.ml.yml
+    #   service: cpu # set to one of [armnn, cuda, rocm, openvino, openvino-wsl, rknn] for accelerated inference - use the `-wsl` version for WSL2 where applicable
+    volumes:
+      - model-cache:/cache
+    env_file:
+      - ${IMMICH_ENV_FILE:-/etc/home-driver/immich.env}
+    environment:
+      MACHINE_LEARNING_MODEL_REVISION: v2
+    restart: always
+    healthcheck:
+      disable: false
+
+  redis:
+    container_name: immich_redis
+    image: docker.io/valkey/valkey:9@sha256:418652cfb58ef879d4978c33553735d7147016032d5aefaa14c828e611eb9dfd
+    healthcheck:
+      test: redis-cli ping | grep -q PONG || exit 1
+    restart: always
+
+  database:
+    container_name: immich_postgres
+    image: ghcr.io/immich-app/postgres:14-vectorchord0.4.3-pgvectors0.2.0@sha256:bcf63357191b76a916ae5eb93464d65c07511da41e3bf7a8416db519b40b1c23
+    environment:
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_USER: ${DB_USERNAME}
+      POSTGRES_DB: ${DB_DATABASE_NAME}
+      POSTGRES_INITDB_ARGS: '--data-checksums'
+      # Uncomment the DB_STORAGE_TYPE: 'HDD' var if your database isn't stored on SSDs
+      # (home-driver keeps the database on the internal SSD, so leave it commented.)
+      # DB_STORAGE_TYPE: 'HDD'
+    volumes:
+      # Do not edit the next line. If you want to change the database storage location on your system, edit the value of DB_DATA_LOCATION in the .env file
+      - ${DB_DATA_LOCATION}:/var/lib/postgresql/data
+    shm_size: 128mb
+    restart: always
+    healthcheck:
+      disable: false
+
+volumes:
+  model-cache:

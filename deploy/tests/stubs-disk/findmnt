@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+# Test stub for findmnt: the root filesystem is on /dev/fakeroot1, nothing else is mounted.
+echo "findmnt $*" >>"${STUB_LOG:-/dev/null}"
+last="${*: -1}"
+if [[ "$last" == "/" && "$*" != *"-M"* ]]; then echo "${STUB_ROOT_SOURCE-/dev/fakeroot1}"; exit 0; fi
+exit 1

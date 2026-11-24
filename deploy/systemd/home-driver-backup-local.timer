@@ -1,0 +1,12 @@
+[Unit]
+Description=home-driver: schedule for the nightly local backup
+
+[Timer]
+OnCalendar=*-*-* 02:30:00
+# Persistent: if the laptop was off at the scheduled time, run at next boot.
+Persistent=true
+AccuracySec=1min
+Unit=home-driver-backup-local.service
+
+[Install]
+WantedBy=timers.target

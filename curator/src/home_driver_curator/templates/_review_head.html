@@ -1,0 +1,3 @@
+<a class="icon-btn" href="./" aria-label="{{ t('back_home') }}" title="{{ t('back_home') }}">{{ icon('back') }}</a>
+<span class="appbar-title">{{ t('cat_' ~ category) }}</span>
+{% if total %}<span class="chip chip-accent progress" aria-live="polite">{{ t('left', n=total) }}</span>{% endif %}

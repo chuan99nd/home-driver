@@ -1,0 +1,4 @@
+<div class="segmented modes" role="group" aria-label="{{ t('view_single') }} / {{ t('view_grid') }}">
+  <a class="segment" href="review?category={{ category }}&amp;mode=one" {% if mode == 'one' %}aria-current="true"{% endif %}>{{ icon('one') }}<span>{{ t('view_single') }}</span></a>
+  <a class="segment" href="review?category={{ category }}&amp;mode=grid" {% if mode == 'grid' %}aria-current="true"{% endif %}>{{ icon('grid') }}<span>{{ t('view_grid') }}</span></a>
+</div>

@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% set nav = 'activity' %}
+{% block title %}{{ t('activity_title') }} · {{ t('app_name') }}{% endblock %}
+{% block content %}
+<section class="hero">
+  <h1>{{ t('activity_title') }}</h1>
+  <p class="lead">{{ t('activity_lead') }}</p>
+  <p class="hint">{{ icon('shield') }} {{ t('safe_note') }}</p>
+</section>
+{% if not entries %}
+<section class="empty"><p class="muted">{{ t('activity_empty') }}</p></section>
+{% else %}
+<ol class="log">
+  {% for e in entries %}
+  <li class="log-item">
+    <div class="log-main">
+      <p class="log-what">{{ t('act_' ~ e.row.action, n=e.row.count) }}{% if e.row.category %} · <span class="muted">{{ t('cat_' ~ e.row.category) }}</span>{% endif %}</p>
+      <p class="log-meta muted"><time datetime="{{ e.row.ts|iso }}" data-ts="{{ e.row.ts|iso }}">{{ e.row.ts|dt }}</time> · {{ t('by', user=e.row.user) }}</p>
+      {% if e.row.dry_run %}<span class="chip">{{ t('act_dry') }}</span>{% endif %}
+      {% if e.row.undone %}<span class="chip">{{ t('act_undone') }}</span>{% endif %}
+      {% if e.assets or e.row.detail %}
+      <details class="more"><summary>{{ t('details') }}</summary>
+        {% if e.assets %}<ul class="names">{% for a in e.assets %}<li>{{ a.name or a.id }}</li>{% endfor %}</ul>{% endif %}
+        {% if e.row.detail %}<p class="tech">{{ e.row.detail }}</p>{% endif %}
+      </details>
+      {% endif %}
+    </div>
+    {% if e.row.action == 'trash' and not e.row.undone and not e.row.dry_run and e.assets %}
+    <form method="post" action="undo">
+      <input type="hidden" name="activity" value="{{ e.row.id }}">
+      <input type="hidden" name="from" value="activity">
+      <button class="btn btn-tonal" type="submit">{{ icon('undo') }}<span class="btn-label">{{ t('undo') }}</span></button>
+    </form>
+    {% endif %}
+  </li>
+  {% endfor %}
+</ol>
+{% if pages > 1 %}
+<nav class="pager" aria-label="{{ t('page_of', i=page, n=pages) }}">
+  {% if page > 1 %}<a class="btn btn-text" href="activity?page={{ page - 1 }}">{{ icon('prev') }}<span class="btn-label">{{ t('previous') }}</span></a>{% else %}<span></span>{% endif %}
+  <span class="muted">{{ t('page_of', i=page, n=pages) }}</span>
+  {% if page < pages %}<a class="btn btn-text" href="activity?page={{ page + 1 }}"><span class="btn-label">{{ t('next') }}</span>{{ icon('next') }}</a>{% else %}<span></span>{% endif %}
+</nav>
+{% endif %}
+{% endif %}
+{% endblock %}

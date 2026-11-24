@@ -1,0 +1,12 @@
+[Unit]
+Description=home-driver: schedule for the monthly scrub (first Sunday of the month)
+
+[Timer]
+OnCalendar=Sun *-*-01..07 06:00:00
+# Persistent: if the laptop was off at the scheduled time, run at next boot.
+Persistent=true
+AccuracySec=1min
+Unit=home-driver-scrub.service
+
+[Install]
+WantedBy=timers.target

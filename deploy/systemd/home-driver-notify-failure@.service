@@ -1,0 +1,12 @@
+# Sends an alert when another home-driver unit fails.
+# Used as:  OnFailure=home-driver-notify-failure@%n.service
+# %i is then the full name of the unit that failed.
+[Unit]
+Description=home-driver: alert that %i failed
+Documentation=file:///opt/home-driver/docs/RUNBOOK.md
+
+[Service]
+Type=oneshot
+# Runs as root so notify.sh can read /etc/home-driver/common.env (0600).
+# notify.sh always exits 0; it never makes things worse.
+ExecStart=/opt/home-driver/scripts/notify.sh "%i FAILED" "The systemd unit %i failed on %H. First step: sudo /opt/home-driver/scripts/doctor.sh  Then: journalctl -u %i -n 50" high

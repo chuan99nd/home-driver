@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block title %}{{ t('cat_' ~ category) }} · {{ t('app_name') }}{% endblock %}
+{% block body_class %}task{% endblock %}
+{% block appbar_start %}{% include "_review_head.html" %}{% endblock %}
+{% block content %}
+<section class="review" data-review="one">
+  <div class="review-top">
+    <h1 class="reason">{{ t('reason_' ~ category) }}</h1>
+    {% include "_modes.html" %}
+  </div>
+
+  <div class="stage-wrap">
+    {% if i > 0 %}<a class="step step-prev" id="prev" href="review?category={{ category }}&amp;mode=one&amp;i={{ i - 1 }}" aria-label="{{ t('previous') }}" title="{{ t('previous') }}">{{ icon('prev') }}</a>{% endif %}
+    <figure class="stage is-loading" data-photo data-swipe>
+      <img src="thumb?id={{ item.asset_id }}&amp;size=preview" alt="{{ item.file_name }}">
+      <p class="photo-wait" role="status">{{ t('loading_photo') }}</p>
+      <div class="photo-error" role="alert">
+        <p>{{ t('photo_failed') }}</p>
+        <button class="btn btn-tonal" type="button" data-retry><span class="btn-label">{{ t('retry') }}</span></button>
+      </div>
+    </figure>
+    {% if i + 1 < total %}<a class="step step-next" id="next" href="review?category={{ category }}&amp;mode=one&amp;i={{ i + 1 }}" aria-label="{{ t('next') }}" title="{{ t('next') }}">{{ icon('next') }}</a>{% endif %}
+  </div>
+
+  <form method="post" class="decide">
+    {% include "_hidden.html" %}
+    <button class="btn btn-primary btn-big" id="btn-keep" type="submit" formaction="keep" name="one" value="{{ item.id }}" title="{{ t('keep_key') }}">{{ icon('keep') }}<span class="btn-label">{{ t('keep') }}</span></button>
+    <button class="btn btn-tonal btn-big" id="btn-trash" type="submit" formaction="trash" name="one" value="{{ item.id }}" title="{{ t('trash_key') }}">{{ icon('trash') }}<span class="btn-label">{{ t('trash') }}</span></button>
+  </form>
+
+  <p class="hint">{{ t('swipe_hint') }}</p>
+  <p class="hint">{{ icon('shield') }} {{ t('safe_note') }}</p>
+
+  <details class="more">
+    <summary>{{ t('technical') }}</summary>
+    <dl class="facts">
+      <dt>{{ t('file') }}</dt><dd>{{ item.file_name }}</dd>
+      {% if item.taken_at_iso %}<dt>{{ t('taken') }}</dt><dd><time datetime="{{ item.taken_at_iso }}" data-ts="{{ item.taken_at_iso }}" data-tz="UTC">{{ item.taken_at_iso[:16]|replace('T', ' ') }}</time></dd>{% endif %}
+      {% if item.camera %}<dt>{{ t('camera') }}</dt><dd>{{ item.camera }}</dd>{% endif %}
+    </dl>
+    <p class="tech">{{ item.reason }} ({{ '%.3g'|format(item.score) }})</p>
+    {% if immich_public_url %}<p><a href="{{ immich_public_url }}/photos/{{ item.asset_id }}" target="_blank" rel="noopener noreferrer">{{ t('open_immich') }}</a></p>{% endif %}
+  </details>
+  {% if upcoming %}<link rel="preload" as="image" href="thumb?id={{ upcoming.asset_id }}&amp;size=preview">{% endif %}
+</section>
+{% endblock %}

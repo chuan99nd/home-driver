@@ -1,0 +1,19 @@
+[Unit]
+Description=home-driver: nightly encrypted offsite backup (restic, optional)
+Documentation=file:///opt/home-driver/docs/RUNBOOK.md
+# Ordering only (no Requires): at boot, wait for the USB disks to be mounted or
+# to time out. A missing disk must NOT silently skip this unit: the script
+# itself checks the disks and alerts, and a "dependency failed" would not
+# trigger OnFailure=.
+After=local-fs.target srv-home\x2ddriver-data.mount srv-home\x2ddriver-backup.mount network-online.target home-driver-backup-local.service
+Wants=network-online.target
+OnFailure=home-driver-notify-failure@%n.service
+
+[Service]
+Type=oneshot
+# Runs as root: needs btrfs, docker and raw disk access.
+ExecStart=/opt/home-driver/scripts/backup-offsite.sh
+TimeoutStartSec=7d
+Nice=10
+IOSchedulingClass=best-effort
+IOSchedulingPriority=7

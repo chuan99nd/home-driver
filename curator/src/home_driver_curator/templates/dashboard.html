@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% set nav = 'home' %}
+{% block content %}
+<section class="hero">
+  <h1>{{ t('home_title') }}</h1>
+  {% if total %}
+  <p class="lead">{{ t('home_lead') }}</p>
+  <p class="hero-count">{{ t('home_count', n=total) }}</p>
+  <a class="btn btn-primary btn-big" href="review?category={{ first }}">{{ icon('one') }}<span class="btn-label">{{ t('home_start') }}</span></a>
+  {% else %}
+  <p class="lead">{{ t('home_all_done') }}</p>
+  <p class="muted">{{ t('home_all_done_hint') }}</p>
+  {% endif %}
+</section>
+
+<ul class="cats">
+  {% for c in cards %}
+  <li>
+    {% if c.count %}
+    <a class="cat" href="review?category={{ c.name }}">
+      <span class="cat-cover" data-photo><img src="thumb?id={{ c.cover }}&amp;size=thumbnail" alt="" loading="lazy"></span>
+      <span class="cat-body"><span class="cat-name">{{ t('cat_' ~ c.name) }}</span><span class="cat-help">{{ t('help_' ~ c.name) }}</span></span>
+      <span class="chip chip-accent">{{ t('count_photos', n=c.count) }}</span>
+    </a>
+    {% else %}
+    <div class="cat cat-idle">
+      <span class="cat-cover cat-cover-empty">{{ icon('check') }}</span>
+      <span class="cat-body"><span class="cat-name">{{ t('cat_' ~ c.name) }}</span><span class="cat-help">{{ t('help_' ~ c.name) }}</span></span>
+      <span class="chip">{{ t('none_left') if c.enabled else t('turned_off') }}</span>
+    </div>
+    {% endif %}
+  </li>
+  {% endfor %}
+</ul>
+
+<section class="card reassure">
+  {{ icon('shield') }}
+  <div>
+    <p>{{ t('safe_note') }}</p>
+    <p class="muted">{{ t('video_note') }}</p>
+  </div>
+</section>
+
+<section class="card">
+  <h2>{{ t('scan_title') }}</h2>
+  {% if not scan %}
+  <p>{{ t('scan_never') }}</p>
+  {% elif scan.status == 'completed' %}
+  <p data-ts="{{ scan.finished_at|iso }}" data-tpl="{{ t('scan_completed') }}">{{ t('scan_completed', when=scan.finished_at|dt) }}</p>
+  {% else %}
+  <p>{{ t('scan_' ~ scan.status) }}</p>
+  {% endif %}
+  {% if stats.known %}<p class="muted">{{ t('scan_progress', done=stats.analysed, total=stats.known) }}</p>{% endif %}
+  {% if scan and scan.remaining %}<p class="muted">{{ t('scan_remaining', n=scan.remaining) }}</p>{% endif %}
+  {% if stats.kept %}<p class="muted">{{ t('kept_forever', n=stats.kept) }}</p>{% endif %}
+  {% if scan and scan.message %}
+  <details class="more"><summary>{{ t('details') }}</summary><p class="tech">{{ scan.message }}</p></details>
+  {% endif %}
+</section>
+{% endblock %}

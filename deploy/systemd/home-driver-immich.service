@@ -1,0 +1,28 @@
+[Unit]
+Description=home-driver: Immich photo server (docker compose)
+Documentation=https://docs.immich.app file:///opt/home-driver/docs/RUNBOOK.md
+Requires=docker.service
+After=docker.service network-online.target
+Wants=network-online.target
+# Hard rule: never start without Disk A. RequiresMountsFor pulls in and orders
+# after the mount; the Assert checks it is really OUR disk (marker file written
+# by setup-disks.sh), not an empty mountpoint directory on the SSD.
+RequiresMountsFor=/srv/home-driver/data
+AssertPathExists=/srv/home-driver/data/.home-driver-disk
+AssertPathIsDirectory=/srv/home-driver/data/immich
+AssertPathExists=/etc/home-driver/immich.env
+OnFailure=home-driver-notify-failure@%n.service
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+# The first start downloads several GB of images.
+TimeoutStartSec=30min
+TimeoutStopSec=5min
+ExecStart=/opt/home-driver/scripts/immich-compose.sh up --detach --remove-orphans
+# `down` removes the containers, so Docker cannot restart them on its own at the
+# next boot before the disk is mounted. Named volumes (the ML model cache) stay.
+ExecStop=/opt/home-driver/scripts/immich-compose.sh down
+
+[Install]
+WantedBy=multi-user.target

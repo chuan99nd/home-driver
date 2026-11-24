@@ -1,0 +1,24 @@
+#!/usr/bin/env bash
+# Test stub for btrfs: snapshots are plain copies, subvolumes plain directories.
+echo "btrfs $*" >>"${STUB_LOG:-/dev/null}"
+case "${1:-} ${2:-}" in
+  "subvolume snapshot")
+    shift 2
+    [[ "$1" == -r ]] && shift
+    [[ "${STUB_BTRFS_SNAPSHOT_FAIL:-0}" == 1 ]] && exit 1
+    cp -a "$1" "$2"
+    ;;
+  "subvolume delete") rm -rf -- "$3" ;;
+  "subvolume create") mkdir -p "$3" ;;
+  "subvolume show") [[ -d "$3" ]] ;;
+  "scrub start") exit "${STUB_SCRUB_RC:-0}" ;;
+  "scrub status")
+    printf 'UUID:             0000\nScrub started:    Mon Jan  1 00:00:00 2026\nStatus:           %s\nDuration:         1:00:00\nError summary:    %s\n' \
+      "${STUB_SCRUB_STATUS:-finished}" "${STUB_SCRUB_SUMMARY:-no errors found}"
+    ;;
+  "device stats")
+    printf '[/dev/fake].write_io_errs    0\n[/dev/fake].read_io_errs     0\n[/dev/fake].flush_io_errs    0\n[/dev/fake].corruption_errs  %s\n[/dev/fake].generation_errs  0\n' \
+      "${STUB_DEV_CORRUPTION:-0}"
+    ;;
+esac
+exit 0

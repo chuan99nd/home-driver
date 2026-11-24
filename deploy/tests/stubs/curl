@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+# Test stub for curl: records the call, never touches the network.
+echo "curl $*" >>"${STUB_LOG:-/dev/null}"
+exit "${STUB_CURL_RC:-0}"

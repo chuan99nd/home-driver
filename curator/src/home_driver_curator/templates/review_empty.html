@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block body_class %}task{% endblock %}
+{% block appbar_start %}{% include "_review_head.html" %}{% endblock %}
+{% block content %}
+<section class="empty">
+  <span class="empty-mark">{{ icon('check') }}</span>
+  <h1>{{ t('empty_title') }}</h1>
+  <p class="muted">{{ t('empty_text') }}</p>
+  <a class="btn btn-primary btn-big" href="./"><span class="btn-label">{{ t('back_home') }}</span></a>
+</section>
+{% endblock %}

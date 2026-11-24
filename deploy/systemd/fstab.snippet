@@ -1,0 +1,11 @@
+# home-driver: the two USB disks, mounted by LABEL (never by /dev/sdX, which
+# changes between boots). install.sh appends these lines to /etc/fstab if no
+# line for the mountpoint exists yet.
+#
+#   nofail                        the laptop still boots when a disk is unplugged
+#   x-systemd.device-timeout=30   wait at most 30 s for the disk at boot
+#   noatime                       do not write to the disk on every read
+#   subvol=...                    the subvolume created by setup-disks.sh
+#
+LABEL=hd-data    /srv/home-driver/data    btrfs  subvol=@data,noatime,nofail,x-systemd.device-timeout=30    0  0
+LABEL=hd-backup  /srv/home-driver/backup  btrfs  subvol=@backup,noatime,nofail,x-systemd.device-timeout=30  0  0

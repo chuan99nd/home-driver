@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+# Test stub for systemctl.
+echo "systemctl $*" >>"${STUB_LOG:-/dev/null}"
+case "${1:-}" in
+  is-active)
+    state=${STUB_SYSTEMCTL_ACTIVE:-active}
+    [[ "$*" == *--quiet* ]] || echo "$state"
+    [[ "$state" == active ]]; exit $?
+    ;;
+  is-failed) exit 1 ;;
+  is-enabled) echo "${STUB_SYSTEMCTL_ENABLED:-enabled}" ;;
+esac
+exit 0

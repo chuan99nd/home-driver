@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+# Test stub for uv: records the call and fakes the curator entry point, so the
+# install test needs no network.
+echo "uv $*" >>"${STUB_LOG:-/dev/null}"
+if [[ -n "${UV_PROJECT_ENVIRONMENT:-}" && ! -e "$UV_PROJECT_ENVIRONMENT/bin/home-driver-curator" ]]; then
+  mkdir -p "$UV_PROJECT_ENVIRONMENT/bin"
+  printf '#!/bin/sh\nexit 0\n' >"$UV_PROJECT_ENVIRONMENT/bin/home-driver-curator"
+  chmod +x "$UV_PROJECT_ENVIRONMENT/bin/home-driver-curator"
+fi
+exit 0

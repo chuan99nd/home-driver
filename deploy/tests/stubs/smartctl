@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+# Test stub for smartctl.
+echo "smartctl $*" >>"${STUB_LOG:-/dev/null}"
+if [[ "${STUB_SMART_UNREADABLE:-0}" == 1 ]]; then echo "Unknown USB bridge"; exit 1; fi
+if [[ "${STUB_SMART_NEEDS_SAT:-0}" == 1 && "$*" != *"-d sat"* ]]; then
+  echo "/dev/fake: Unknown USB bridge [0x1234:0x5678]"; echo "Please specify device type with the -d option."; exit 1
+fi
+cat <<OUT
+smartctl 7.4 (stub)
+=== START OF INFORMATION SECTION ===
+Device Model:     STUB DISK 4TB
+Serial Number:    ${STUB_SMART_SERIAL:-SERIAL123}
+=== START OF READ SMART DATA SECTION ===
+SMART overall-health self-assessment test result: ${STUB_SMART_HEALTH:-PASSED}
+
+ID# ATTRIBUTE_NAME          FLAG     VALUE WORST THRESH TYPE      UPDATED  WHEN_FAILED RAW_VALUE
+  5 Reallocated_Sector_Ct   0x0033   100   100   010    Pre-fail  Always       -       ${STUB_SMART_REALLOC:-0}
+  9 Power_On_Hours          0x0032   095   095   000    Old_age   Always       -       12345
+197 Current_Pending_Sector  0x0012   100   100   000    Old_age   Always       -       ${STUB_SMART_PENDING:-0}
+198 Offline_Uncorrectable   0x0010   100   100   000    Old_age   Offline      -       0
+OUT
+[[ "${STUB_SMART_HEALTH:-PASSED}" == PASSED ]] || exit 8
+exit 0

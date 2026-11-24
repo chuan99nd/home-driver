@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+# Test stub for restic.
+echo "restic $*" >>"${STUB_LOG:-/dev/null}"
+args=" $* "
+case "$args" in
+  *" cat config "*) [[ "${STUB_RESTIC_NO_REPO:-0}" == 1 ]] && exit 10 ;;
+  *" backup "*) exit "${STUB_RESTIC_BACKUP_RC:-0}" ;;
+  *" check "*) exit "${STUB_RESTIC_CHECK_RC:-0}" ;;
+esac
+exit 0

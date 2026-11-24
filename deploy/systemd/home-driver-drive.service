@@ -1,0 +1,52 @@
+[Unit]
+Description=home-driver: Drive web app
+Documentation=file:///opt/home-driver/docs/RUNBOOK.md
+After=network-online.target
+Wants=network-online.target
+# Hard rule: never start without Disk A (see home-driver-immich.service).
+RequiresMountsFor=/srv/home-driver/data
+AssertPathExists=/srv/home-driver/data/.home-driver-disk
+AssertPathExists=/etc/home-driver/drive.env
+OnFailure=home-driver-notify-failure@%n.service
+StartLimitIntervalSec=10min
+StartLimitBurst=5
+
+[Service]
+Type=simple
+User=home-driver
+Group=home-driver
+# systemd reads these as root and passes the variables to the unprivileged process.
+EnvironmentFile=/etc/home-driver/common.env
+EnvironmentFile=/etc/home-driver/drive.env
+ExecStart=/opt/home-driver/bin/drive
+Restart=on-failure
+RestartSec=5
+# --- hardening ---
+NoNewPrivileges=yes
+ProtectSystem=strict
+ProtectHome=yes
+PrivateTmp=yes
+PrivateDevices=yes
+ProtectKernelTunables=yes
+ProtectKernelModules=yes
+ProtectKernelLogs=yes
+ProtectControlGroups=yes
+ProtectClock=yes
+ProtectHostname=yes
+RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX AF_NETLINK
+RestrictNamespaces=yes
+RestrictRealtime=yes
+RestrictSUIDSGID=yes
+LockPersonality=yes
+SystemCallArchitectures=native
+SystemCallFilter=@system-service
+SystemCallErrorNumber=EPERM
+CapabilityBoundingSet=
+AmbientCapabilities=
+UMask=0027
+MemoryDenyWriteExecute=yes
+# The only places Drive may write. Both must exist or the unit refuses to start.
+ReadWritePaths=/srv/home-driver/data/drive /var/lib/home-driver/drive
+
+[Install]
+WantedBy=multi-user.target

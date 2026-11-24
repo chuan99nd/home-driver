@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block title %}{{ t('cat_' ~ category) }} · {{ t('app_name') }}{% endblock %}
+{% block body_class %}task{% endblock %}
+{% block appbar_start %}{% include "_review_head.html" %}{% endblock %}
+{% block content %}
+<section class="review">
+  <div class="review-top">
+    <h1 class="reason">{{ t('reason_' ~ category) }}</h1>
+    {% include "_modes.html" %}
+  </div>
+  <p class="hint">{{ icon('shield') }} {{ t('safe_note') }}</p>
+
+  <form method="post" class="gridform" data-grid>
+    {% include "_hidden.html" %}
+    <input type="hidden" name="confirm" value="">
+    <div class="grid-tools js-only">
+      <button class="btn btn-tonal" type="button" data-select-all data-all="{{ t('select_all') }}" data-none="{{ t('select_none') }}" aria-pressed="false">{{ icon('check') }}<span class="btn-label">{{ t('select_all') }}</span></button>
+    </div>
+    <ul class="grid">
+      {% for it in items %}
+      <li>
+        <label class="tile">
+          <input type="checkbox" name="sel" value="{{ it.id }}" aria-label="{{ t('select_photo', name=it.file_name) }}">
+          <span class="tile-photo is-loading" data-photo><img src="thumb?id={{ it.asset_id }}&amp;size=thumbnail" alt="" loading="lazy"></span>
+          <span class="tile-check">{{ icon('check') }}</span>
+          <span class="tile-name">{{ it.file_name }}</span>
+        </label>
+      </li>
+      {% endfor %}
+    </ul>
+
+    {% if pages > 1 %}
+    <nav class="pager" aria-label="{{ t('page_of', i=page, n=pages) }}">
+      {% if page > 1 %}<a class="btn btn-text" href="review?category={{ category }}&amp;mode=grid&amp;page={{ page - 1 }}">{{ icon('prev') }}<span class="btn-label">{{ t('previous') }}</span></a>{% else %}<span></span>{% endif %}
+      <span class="muted">{{ t('page_of', i=page, n=pages) }}</span>
+      {% if page < pages %}<a class="btn btn-text" href="review?category={{ category }}&amp;mode=grid&amp;page={{ page + 1 }}"><span class="btn-label">{{ t('next') }}</span>{{ icon('next') }}</a>{% else %}<span></span>{% endif %}
+    </nav>
+    {% endif %}
+
+    <div class="bulkbar">
+      <span class="bulk-count js-only" data-count aria-live="polite"></span>
+      <button class="btn btn-primary" type="submit" formaction="keep" data-needs-selection>{{ icon('keep') }}<span class="btn-label">{{ t('keep_selected') }}</span></button>
+      <button class="btn btn-tonal" type="submit" formaction="trash" data-needs-selection>{{ icon('trash') }}<span class="btn-label">{{ t('trash_selected') }}</span></button>
+    </div>
+  </form>
+
+  <dialog class="dialog" id="confirm" aria-labelledby="confirm-title">
+    <form method="dialog">
+      <h2 id="confirm-title" data-confirm-title></h2>
+      <p>{{ t('confirm_text') }}</p>
+      <div class="dialog-actions">
+        <button class="btn btn-tonal" value="" autofocus><span class="btn-label">{{ t('cancel') }}</span></button>
+        <button class="btn btn-primary" value="yes"><span class="btn-label" data-confirm-yes></span></button>
+      </div>
+    </form>
+  </dialog>
+</section>
+{% endblock %}

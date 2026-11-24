@@ -1,0 +1,71 @@
+# EXAMPLE ONLY. home-driver never edits your cloudflared configuration.
+#
+# You already have a working tunnel. Add the two hostname entries below to the
+# `ingress:` list of YOUR existing config (usually /etc/cloudflared/config.yml),
+# ABOVE the final catch-all `- service: http_status:404` line, then:
+#
+#   sudo cloudflared tunnel ingress validate     # expected: "OK"
+#   sudo systemctl restart cloudflared
+#
+# and create the two DNS records (once):
+#
+#   cloudflared tunnel route dns <your-tunnel-name> photos.example.com
+#   cloudflared tunnel route dns <your-tunnel-name> drive.example.com
+#
+# If you manage the tunnel from the Cloudflare dashboard instead (Zero Trust >
+# Networks > Tunnels > your tunnel > Public Hostname), add the same two
+# hostnames there with the same http://127.0.0.1:PORT services.
+#
+# Replace example.com with your domain (HD_DOMAIN in /etc/home-driver/common.env).
+
+tunnel: <your-tunnel-id>                               # keep your existing value
+credentials-file: /etc/cloudflared/<your-tunnel-id>.json   # keep your existing value
+
+ingress:
+  # Photos (Immich)
+  - hostname: photos.example.com
+    service: http://127.0.0.1:2283
+
+  # Drive. The curator has no hostname of its own: Drive serves it to
+  # administrators at https://drive.example.com/curator/ . Do NOT add an entry
+  # for port 8091.
+  - hostname: drive.example.com
+    service: http://127.0.0.1:8090
+
+  # ... your other existing entries ...
+
+  # Must stay last.
+  - service: http_status:404
+
+# ---------------------------------------------------------------------------
+# NOTES - read these, they explain the two things that commonly go wrong
+# ---------------------------------------------------------------------------
+#
+# 1. The 100 MB limit (free Cloudflare plan)
+#    Cloudflare rejects any single request body larger than about 100 MB
+#    (the phone shows an upload error, HTTP 413).
+#    - Drive is not affected: it uploads in chunks of at most 32 MB.
+#    - Immich IS affected: the mobile app sends each photo/video as one request,
+#      so a video over ~100 MB cannot be uploaded through photos.example.com.
+#      Fix: let the phone talk to the laptop directly when it is on home Wi-Fi.
+#        a) set IMMICH_LAN_ADDR=<laptop's home IP, e.g. 192.168.1.50> in
+#           /etc/home-driver/immich.env, then
+#           sudo systemctl restart home-driver-immich
+#        b) in the Immich mobile app: Settings > Networking > enable
+#           "Automatic URL switching", set your home Wi-Fi name, set
+#           Local network server URL = http://192.168.1.50:2283 and
+#           External network server URL = https://photos.example.com
+#      Big videos then upload at home; everything else works anywhere.
+#      Full walk-through: deploy/docs/INSTALL.md, "Large videos".
+#
+# 2. Do NOT put Cloudflare Access (Zero Trust login page) in front of Immich
+#    The Immich mobile app talks to https://photos.example.com/api/... and cannot
+#    answer a Cloudflare Access login page, so backup and login silently break.
+#    Immich has its own login (accounts + Google sign-in); that is the protection.
+#    If you insist on Access for the web UI, you must add a "Bypass" policy for
+#    at least /api/* and /.well-known/immich, which leaves the API exactly as
+#    exposed as without Access. The same applies to Drive's public share links.
+#
+# 3. Do not enable Cloudflare caching rules ("Cache Everything") or image
+#    optimisation (Polish/Mirage) on these hostnames: private photos must not be
+#    stored or rewritten at the edge.

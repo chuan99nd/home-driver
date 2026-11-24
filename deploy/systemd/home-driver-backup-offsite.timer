@@ -1,0 +1,12 @@
+[Unit]
+Description=home-driver: schedule for the nightly offsite backup (runs after the local backup)
+
+[Timer]
+OnCalendar=*-*-* 04:30:00
+# Persistent: if the laptop was off at the scheduled time, run at next boot.
+Persistent=true
+AccuracySec=1min
+Unit=home-driver-backup-offsite.service
+
+[Install]
+WantedBy=timers.target

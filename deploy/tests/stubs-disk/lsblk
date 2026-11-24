@@ -1,0 +1,53 @@
+#!/usr/bin/env bash
+# Test stub for lsblk with a fixed fake machine:
+#   /dev/fakeroot (nvme)  -> /dev/fakeroot1 mounted on /
+#   /dev/fakeusb  (usb)   -> /dev/fakeusb1  label $STUB_USB_LABEL, mounted at $STUB_USB_MOUNT
+#   /dev/fakesata (sata)     empty internal disk
+#   /dev/fakeother (usb)     label $STUB_OTHER_LABEL
+echo "lsblk $*" >>"${STUB_LOG:-/dev/null}"
+rows=(
+  "/dev/fakeroot|disk|nvme|||"
+  "/dev/fakeroot1|part||rootfs|/|/dev/fakeroot"
+  "/dev/fakeusb|disk|usb|||"
+  "/dev/fakeusb1|part||${STUB_USB_LABEL:-}|${STUB_USB_MOUNT:-}|/dev/fakeusb"
+  "/dev/fakesata|disk|sata|||"
+  "/dev/fakeother|disk|usb|${STUB_OTHER_LABEL:-}||"
+)
+cols=NAME inverse=0 nodeps=0 dev=""
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    -o) cols=$2; shift ;;
+    -*o) [[ "$1" == *s* ]] && inverse=1; [[ "$1" == *d* ]] && nodeps=1; cols=$2; shift ;;
+    -*) [[ "$1" == *s* ]] && inverse=1; [[ "$1" == *d* ]] && nodeps=1 ;;
+    *) dev=$1 ;;
+  esac
+  shift
+done
+emit() { # <row>
+  local name type tran label mp pk out="" c
+  IFS='|' read -r name type tran label mp pk <<<"$1"
+  IFS=',' read -ra want <<<"$cols"
+  for c in "${want[@]}"; do
+    case "$c" in
+      NAME) out+="$name " ;; TYPE) out+="$type " ;; TRAN) out+="$tran " ;;
+      LABEL) out+="$label " ;; MOUNTPOINT) out+="$mp " ;; PKNAME) out+="$pk " ;;
+      *) out+="- " ;;
+    esac
+  done
+  echo "${out% }"
+}
+found=0
+for r in "${rows[@]}"; do
+  name=${r%%|*}; pk=${r##*|}
+  if [[ -z "$dev" ]]; then emit "$r"; found=1; continue; fi
+  if [[ $inverse == 1 ]]; then
+    # the device itself and its parent disk
+    if [[ "$name" == "$dev" ]]; then
+      emit "$r"; found=1
+      for p in "${rows[@]}"; do [[ -n "$pk" && "${p%%|*}" == "$pk" ]] && emit "$p"; done
+    fi
+  elif [[ "$name" == "$dev" ]]; then emit "$r"; found=1
+  elif [[ $nodeps == 0 && "$pk" == "$dev" ]]; then emit "$r"; found=1
+  fi
+done
+[[ $found == 1 ]]

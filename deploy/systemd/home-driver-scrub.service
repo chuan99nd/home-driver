@@ -1,0 +1,18 @@
+[Unit]
+Description=home-driver: monthly btrfs scrub of both disks (detects silent corruption)
+Documentation=file:///opt/home-driver/docs/RUNBOOK.md
+# Ordering only (no Requires): at boot, wait for the USB disks to be mounted or
+# to time out. A missing disk must NOT silently skip this unit: the script
+# itself checks the disks and alerts, and a "dependency failed" would not
+# trigger OnFailure=.
+After=local-fs.target srv-home\x2ddriver-data.mount srv-home\x2ddriver-backup.mount
+OnFailure=home-driver-notify-failure@%n.service
+
+[Service]
+Type=oneshot
+# Runs as root: needs btrfs, docker and raw disk access.
+ExecStart=/opt/home-driver/scripts/scrub.sh
+TimeoutStartSec=4d
+Nice=10
+IOSchedulingClass=best-effort
+IOSchedulingPriority=7

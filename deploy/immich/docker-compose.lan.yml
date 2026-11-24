@@ -1,0 +1,15 @@
+#
+# Optional override, added automatically by scripts/immich-compose.sh ONLY when
+# IMMICH_LAN_ADDR is set in /etc/home-driver/immich.env.
+#
+# It publishes Immich a second time on one private home-network address of the
+# laptop, so the phone app can upload large videos directly over home Wi-Fi
+# (Cloudflare's free plan rejects request bodies over ~100 MB).
+#
+# immich-compose.sh refuses anything that is not a private (RFC1918) IPv4 address.
+# Never put 0.0.0.0 here.
+
+services:
+  immich-server:
+    ports:
+      - '${IMMICH_LAN_ADDR:?IMMICH_LAN_ADDR is not set}:2283:2283'

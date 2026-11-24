@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% block title %}{{ t('cat_' ~ category) }} · {{ t('app_name') }}{% endblock %}
+{% block body_class %}task{% endblock %}
+{% block appbar_start %}{% include "_review_head.html" %}{% endblock %}
+{% block content %}
+<section class="review" data-review="group">
+  <div class="review-top">
+    <h1 class="reason">{{ t('reason_' ~ category, n=members|length) }}</h1>
+    <p class="muted pager-text">{{ t('group_of', i=i + 1, n=count) }}</p>
+  </div>
+  <p class="hint">{{ t('group_hint') }}</p>
+
+  <form method="post" class="group">
+    {% include "_hidden.html" %}
+    <ul class="frames">
+      {% for m in members %}
+      {% set is_keeper = m.asset_id == group.keeper_asset_id %}
+      <li class="frame {% if is_keeper %}is-keeper{% endif %}">
+        {% if is_keeper or m.is_trashed %}
+        <span class="frame-photo is-loading" data-photo><img src="thumb?id={{ m.asset_id }}&amp;size=preview" alt="{{ m.file_name }}" loading="lazy"></span>
+        {% else %}
+        <button class="frame-photo frame-pick is-loading" data-photo type="submit" formaction="keeper" name="choose" value="{{ group.id }}:{{ m.asset_id }}" title="{{ t('choose_keep') }}">
+          <img src="thumb?id={{ m.asset_id }}&amp;size=preview" alt="{{ m.file_name }}" loading="lazy">
+          <span class="frame-cta">{{ t('choose_keep') }}</span>
+        </button>
+        {% endif %}
+        <span class="frame-badges">
+          {% if is_keeper %}<span class="chip chip-accent">{{ icon('star') }}{{ t('best') }}</span>{% endif %}
+          {% if m.is_favorite %}<span class="chip">{{ icon('keep') }}{{ t('favourite') }}</span>
+          {% elif m.keep_listed %}<span class="chip">{{ t('always_kept') }}</span>
+          {% elif m.suggestion_status == 'pending' %}<span class="chip">{{ t('will_remove') }}</span>{% endif %}
+        </span>
+      </li>
+      {% endfor %}
+    </ul>
+
+    <div class="group-actions">
+      <button class="btn btn-primary btn-big" id="btn-trash" type="submit" formaction="trash" name="group" value="{{ group.id }}">{{ icon('check') }}<span class="btn-label">{{ t('group_trash') }}</span></button>
+      {% if category == 'burst' %}
+      <button class="btn btn-tonal btn-big" type="submit" formaction="stack" name="group" value="{{ group.id }}">{{ icon('stack') }}<span class="btn-label">{{ t('group_stack') }}</span></button>
+      {% endif %}
+      <button class="btn btn-text btn-big" id="btn-keep" type="submit" formaction="keep" name="group" value="{{ group.id }}">{{ icon('keep') }}<span class="btn-label">{{ t('group_keep_all') }}</span></button>
+    </div>
+  </form>
+
+  {% if category == 'burst' %}<p class="hint">{{ t('group_stack_hint') }}</p>{% endif %}
+  <p class="hint">{{ icon('shield') }} {{ t('safe_note') }}</p>
+
+  <nav class="pager" aria-label="{{ t('group_of', i=i + 1, n=count) }}">
+    {% if i > 0 %}<a class="btn btn-text" id="prev" href="review?category={{ category }}&amp;i={{ i - 1 }}">{{ icon('prev') }}<span class="btn-label">{{ t('previous') }}</span></a>{% else %}<span></span>{% endif %}
+    {% if i + 1 < count %}<a class="btn btn-text" id="next" href="review?category={{ category }}&amp;i={{ i + 1 }}"><span class="btn-label">{{ t('next') }}</span>{{ icon('next') }}</a>{% endif %}
+  </nav>
+</section>
+{% endblock %}

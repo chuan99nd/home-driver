@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+# Generic test stub: records its invocation and succeeds. Symlinked under the
+# names of commands that must never really run in tests (mkfs.btrfs, wipefs...).
+echo "$(basename "$0") $*" >>"${STUB_LOG:-/dev/null}"
+exit 0

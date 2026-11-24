@@ -1,0 +1,16 @@
+# secrets and local config
+*.env
+!*.env.example
+# build output
+/drive/bin/
+/dist/
+# python
+__pycache__/
+.venv/
+.pytest_cache/
+.ruff_cache/
+# local data
+*.db
+*.db-wal
+*.db-shm
+/tmp/

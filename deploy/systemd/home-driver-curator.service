@@ -1,0 +1,51 @@
+[Unit]
+Description=home-driver: photo curator web service
+Documentation=file:///opt/home-driver/docs/RUNBOOK.md
+# The curator talks to Immich over its HTTP API and keeps its own state on the
+# SSD; it never touches Disk A directly, so it has no RequiresMountsFor.
+After=network-online.target home-driver-immich.service
+Wants=network-online.target
+AssertPathExists=/etc/home-driver/curator.env
+OnFailure=home-driver-notify-failure@%n.service
+StartLimitIntervalSec=10min
+StartLimitBurst=5
+
+[Service]
+Type=simple
+User=home-driver
+Group=home-driver
+EnvironmentFile=/etc/home-driver/common.env
+EnvironmentFile=/etc/home-driver/curator.env
+Environment=HOME=/var/lib/home-driver/curator
+Environment=XDG_CACHE_HOME=/var/lib/home-driver/curator/cache
+Environment=PYTHONUNBUFFERED=1
+ExecStart=/opt/home-driver/curator/.venv/bin/home-driver-curator serve
+Restart=on-failure
+RestartSec=5
+# --- hardening ---
+NoNewPrivileges=yes
+ProtectSystem=strict
+ProtectHome=yes
+PrivateTmp=yes
+PrivateDevices=yes
+ProtectKernelTunables=yes
+ProtectKernelModules=yes
+ProtectKernelLogs=yes
+ProtectControlGroups=yes
+ProtectClock=yes
+ProtectHostname=yes
+RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX AF_NETLINK
+RestrictNamespaces=yes
+RestrictRealtime=yes
+RestrictSUIDSGID=yes
+LockPersonality=yes
+SystemCallArchitectures=native
+SystemCallFilter=@system-service
+SystemCallErrorNumber=EPERM
+CapabilityBoundingSet=
+AmbientCapabilities=
+UMask=0027
+ReadWritePaths=/var/lib/home-driver/curator
+
+[Install]
+WantedBy=multi-user.target

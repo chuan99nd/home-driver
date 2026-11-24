@@ -1,0 +1,60 @@
+/* Design tokens: keep identical to the block in docs/DESIGN.md (shared with drive/). */
+:root {
+  color-scheme: light dark;
+  --font: system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans", sans-serif;
+  --bg: oklch(0.985 0.003 250);
+  --surface: oklch(1 0 0);
+  --surface-2: oklch(0.965 0.005 250);
+  --border: oklch(0.9 0.006 250);
+  --text: oklch(0.24 0.012 250);
+  --text-muted: oklch(0.5 0.012 250);
+  --accent: oklch(0.56 0.17 255);
+  --accent-hover: oklch(0.5 0.18 255);
+  --accent-soft: oklch(0.94 0.035 255);
+  --on-accent: oklch(1 0 0);
+  --danger: oklch(0.56 0.2 27);
+  --danger-soft: oklch(0.95 0.03 27);
+  --success: oklch(0.6 0.14 150);
+  --warning: oklch(0.75 0.14 80);
+  --focus: oklch(0.62 0.19 255);
+  --r-s: 8px; --r-m: 12px; --r-l: 20px; --r-full: 999px;
+  --shadow-1: 0 1px 2px oklch(0 0 0 / 0.06), 0 2px 8px oklch(0 0 0 / 0.06);
+  --shadow-2: 0 4px 12px oklch(0 0 0 / 0.1), 0 12px 32px oklch(0 0 0 / 0.12);
+  --t-fast: 120ms; --t-med: 200ms;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: oklch(0.17 0.008 250);
+    --surface: oklch(0.21 0.009 250);
+    --surface-2: oklch(0.26 0.01 250);
+    --border: oklch(0.33 0.012 250);
+    --text: oklch(0.94 0.005 250);
+    --text-muted: oklch(0.72 0.01 250);
+    --accent: oklch(0.74 0.13 255);
+    --accent-hover: oklch(0.8 0.11 255);
+    --accent-soft: oklch(0.32 0.06 255);
+    --on-accent: oklch(0.18 0.02 255);
+    --danger: oklch(0.72 0.16 27);
+    --danger-soft: oklch(0.3 0.06 27);
+    --focus: oklch(0.78 0.13 255);
+    --shadow-1: 0 1px 2px oklch(0 0 0 / 0.4);
+    --shadow-2: 0 8px 28px oklch(0 0 0 / 0.55);
+  }
+}
+:root[data-theme="dark"] {
+  --bg: oklch(0.17 0.008 250);
+  --surface: oklch(0.21 0.009 250);
+  --surface-2: oklch(0.26 0.01 250);
+  --border: oklch(0.33 0.012 250);
+  --text: oklch(0.94 0.005 250);
+  --text-muted: oklch(0.72 0.01 250);
+  --accent: oklch(0.74 0.13 255);
+  --accent-hover: oklch(0.8 0.11 255);
+  --accent-soft: oklch(0.32 0.06 255);
+  --on-accent: oklch(0.18 0.02 255);
+  --danger: oklch(0.72 0.16 27);
+  --danger-soft: oklch(0.3 0.06 27);
+  --focus: oklch(0.78 0.13 255);
+  --shadow-1: 0 1px 2px oklch(0 0 0 / 0.4);
+  --shadow-2: 0 8px 28px oklch(0 0 0 / 0.55);
+}

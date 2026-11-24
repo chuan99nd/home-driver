@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block body_class %}task{% endblock %}
+{% block appbar_start %}{% include "_review_head.html" %}{% endblock %}
+{% block content %}
+<section class="card confirm-page">
+  <h1>{{ t('confirm_title', n=count) }}</h1>
+  <p>{{ t('confirm_text') }}</p>
+  <ul class="strip">
+    {% for r in rows[:12] %}<li><img src="thumb?id={{ r.asset_id }}&amp;size=thumbnail" alt="{{ r.file_name }}" loading="lazy"></li>{% endfor %}
+  </ul>
+  <form method="post" action="trash" class="dialog-actions">
+    {% include "_hidden.html" %}
+    <input type="hidden" name="confirm" value="yes">
+    {% for r in rows %}<input type="hidden" name="sel" value="{{ r.id }}">{% endfor %}
+    <a class="btn btn-tonal" href="review?category={{ category }}&amp;mode={{ mode }}&amp;page={{ page }}"><span class="btn-label">{{ t('cancel') }}</span></a>
+    <button class="btn btn-primary" type="submit"><span class="btn-label">{{ t('confirm_yes', n=count) }}</span></button>
+  </form>
+</section>
+{% endblock %}

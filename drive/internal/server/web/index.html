@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#fafbfc" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#111318" media="(prefers-color-scheme: dark)">
+<meta name="referrer" content="no-referrer">
+<title>Drive</title>
+<link rel="manifest" href="/static/manifest.webmanifest">
+<link rel="icon" href="/static/icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/static/icon-192.png">
+<link rel="stylesheet" href="/static/tokens.css">
+<link rel="stylesheet" href="/static/app.css">
+<script type="module" src="/static/app.js"></script>
+</head>
+<body>
+
+<div id="boot" class="boot" role="status"><div class="spinner"></div><p data-i18n="state.loading"></p></div>
+
+<!-- Sign-in -->
+<main id="signin" class="signin" hidden>
+  <div class="signin-card">
+    <img class="logo" src="/static/icon.svg" alt="" width="64" height="64">
+    <h1 data-i18n="app.name"></h1>
+    <p id="signin-text" data-i18n="signin.tagline"></p>
+    <div id="signin-denied" class="notice" hidden>
+      <strong data-i18n="signin.denied.title"></strong>
+      <span data-i18n="signin.denied.text"></span>
+    </div>
+    <a id="signin-google" class="btn google" href="/auth/login" hidden>
+      <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><use href="/static/icons.svg#i-google"></use></svg>
+      <span data-i18n="signin.google"></span>
+    </a>
+    <form id="signin-dev" class="form dev" hidden>
+      <label for="dev-email" data-i18n="signin.dev.label"></label>
+      <input id="dev-email" class="input" type="email" required autocomplete="email">
+      <button class="btn primary" type="submit" data-i18n="signin.dev.button"></button>
+      <p class="hint" data-i18n="signin.dev.hint"></p>
+    </form>
+    <button id="signin-lang" class="btn text" type="button"></button>
+  </div>
+</main>
+
+<!-- App -->
+<div id="app" class="app" hidden>
+  <aside class="side" aria-label="">
+    <a class="brand" href="#/files">
+      <img src="/static/icon.svg" alt="" width="32" height="32">
+      <span data-i18n="app.name"></span>
+    </a>
+    <button id="new-btn" class="btn primary new" type="button">
+      <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><use href="/static/icons.svg#i-plus"></use></svg>
+      <span data-i18n="action.new"></span>
+    </button>
+    <nav class="nav" id="side-nav" data-i18n-label="nav.label"></nav>
+    <div class="usage" id="usage"></div>
+  </aside>
+
+  <header class="top">
+    <form id="search-form" class="search" role="search">
+      <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><use href="/static/icons.svg#i-search"></use></svg>
+      <input id="search" type="search" autocomplete="off" enterkeyhint="search" data-i18n-placeholder="search.placeholder" data-i18n-label="search.placeholder">
+    </form>
+    <button id="account-btn" class="avatar" type="button" data-i18n-label="account.menu"></button>
+  </header>
+
+  <div id="bulk" class="bulk" role="toolbar" hidden></div>
+
+  <main id="main" class="main" tabindex="-1">
+    <div class="main-head">
+      <nav id="crumbs" class="crumbs" data-i18n-label="crumbs.label"></nav>
+      <div id="tools" class="tools"></div>
+    </div>
+    <div id="content" class="content"></div>
+  </main>
+
+  <nav class="bottom" id="bottom-nav" data-i18n-label="nav.label"></nav>
+  <button id="fab" class="fab" type="button" data-i18n-label="action.new">
+    <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><use href="/static/icons.svg#i-plus"></use></svg>
+  </button>
+
+  <section id="tray" class="tray" hidden data-i18n-label="upload.tray"></section>
+  <div id="drop" class="drop" hidden>
+    <div class="drop-inner">
+      <svg class="icon big" viewBox="0 0 24 24" aria-hidden="true"><use href="/static/icons.svg#i-upload"></use></svg>
+      <p data-i18n="upload.drop"></p>
+    </div>
+  </div>
+</div>
+
+<input id="pick-files" type="file" multiple hidden>
+<input id="pick-folder" type="file" webkitdirectory hidden>
+</body>
+</html>

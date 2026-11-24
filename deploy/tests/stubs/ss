@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+# Test stub for ss: prints the listeners given in STUB_SS_LISTEN (space separated addr:port).
+for l in ${STUB_SS_LISTEN:-127.0.0.1:2283 127.0.0.1:8090 127.0.0.1:8091}; do
+  printf 'LISTEN 0      4096   %s   0.0.0.0:*\n' "$l"
+done
